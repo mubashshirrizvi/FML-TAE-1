@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Product Opinion Mining System</title><meta name="description" content="Sentiment analysis of customer reviews into positive, negative or neutral, with live models, metrics and an interactive analyzer.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0B1020;--b:#4F9DFF;--p:#7C4DFF;--c:#00E5FF;--pos:#34D399;--neg:#F87171;--neu:#FBBF24;--m:#a9b4cc;--g:rgba(255,255,255,.06);--gb:rgba(255,255,255,.12);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0B1020}}
+html{scroll-behavior:smooth;scroll-padding-top:70px}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
+h1,h2,h3{font-family:Poppins,Inter,system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+.grad{background:linear-gradient(90deg,var(--b),var(--p),var(--c));-webkit-background-clip:text;background-clip:text;color:transparent}
+section{padding:80px 20px;max-width:1150px;margin:auto}
+h2{font-size:clamp(1.7rem,4vw,2.5rem)}.sub{color:var(--m);max-width:700px;margin-bottom:32px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--g);border:1px solid var(--gb);border-radius:18px;padding:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .3s,border-color .3s,box-shadow .3s}
+.card:hover{border-color:var(--b);box-shadow:0 10px 40px rgba(79,157,255,.18);transform:translateY(-4px)}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}.rv.in{opacity:1;transform:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 10px;display:flex;justify-content:space-between;align-items:center;background:rgba(11,16,32,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--gb)}
+nav b{font-size:.95rem}nav div{display:flex;gap:16px;font-size:.85rem}nav a{color:var(--m);text-decoration:none}nav a:hover{color:var(--c)}
+@media(max-width:760px){nav div{display:none}}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--b),var(--c));z-index:60}
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;max-width:none;overflow:hidden;position:relative}
+#net{position:absolute;inset:0;width:100%;height:100%}#hero>*:not(canvas){position:relative;z-index:2}
+#hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(124,77,255,.35),transparent 50%),radial-gradient(circle at 75% 70%,rgba(52,211,153,.18),transparent 50%);animation:dg 12s ease-in-out infinite alternate}
+@keyframes dg{to{transform:scale(1.25) rotate(6deg)}}
+h1{font-size:clamp(2.1rem,6vw,4.2rem);max-width:900px}
+.btn{display:inline-block;padding:13px 26px;border-radius:999px;font-weight:600;text-decoration:none;color:#fff;border:1px solid var(--gb);margin:6px;cursor:pointer;background:var(--g);font-size:1rem;transition:transform .2s}
+.btn:hover{transform:scale(1.05)}.btn.pr{background:linear-gradient(90deg,var(--b),var(--p));border:0}
+.num{font-size:2.2rem;font-weight:700}.lbl{color:var(--m);font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--gb)}th{color:var(--c)}.tw{overflow-x:auto}
+details summary{cursor:pointer;color:var(--b);font-size:.9rem;margin-top:10px}details p{color:var(--m);font-size:.9rem;margin:.5em 0}
+.tag{display:inline-block;font-size:.75rem;padding:2px 10px;border-radius:99px;background:rgba(79,157,255,.15);color:var(--b);margin-right:6px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.neu{color:var(--neu)}
+.pill{display:inline-block;padding:2px 12px;border-radius:99px;font-size:.78rem;font-weight:600}
+.pill.positive{background:rgba(52,211,153,.18);color:var(--pos)}.pill.negative{background:rgba(248,113,113,.18);color:var(--neg)}.pill.neutral{background:rgba(251,191,36,.18);color:var(--neu)}
+.cv{position:relative;height:290px}
+.tabs button{margin:3px}.tabs .on{background:linear-gradient(90deg,var(--b),var(--p));border:0}
+.tl{border-left:2px solid var(--gb);margin-left:10px;padding-left:24px}.tl .card{margin-bottom:14px;position:relative}.tl .card:before{content:"";position:absolute;left:-34px;top:26px;width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 14px var(--c)}
+input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--gb);background:rgba(255,255,255,.05);color:#fff;font:inherit;margin-bottom:6px}
+select option{color:#000}.err{color:#ff7b8a;font-size:.8rem;min-height:1.2em;display:block}
+.bar{height:8px;border-radius:99px;background:var(--gb);overflow:hidden;margin:3px 0 8px}.bar i{display:block;height:100%;width:0;transition:width .7s}
+.rl{padding:10px 0;border-bottom:1px solid var(--gb);font-size:.92rem}
+mark{background:none;border-radius:4px;padding:0 3px}mark.p{background:rgba(52,211,153,.25)}mark.n{background:rgba(248,113,113,.25)}
+#cur{position:fixed;width:22px;height:22px;border:2px solid var(--c);border-radius:50%;pointer-events:none;z-index:70;transform:translate(-50%,-50%);display:none}
+@media(hover:hover) and (pointer:fine){#cur{display:block}}
+#top{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid var(--gb);background:var(--g);color:#fff;backdrop-filter:blur(10px);cursor:pointer;opacity:0;pointer-events:none;transition:.3s;z-index:50}#top.show{opacity:1;pointer-events:auto}
+#load{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+#load i{width:50px;height:50px;border:3px solid var(--gb);border-top-color:var(--c);border-radius:50%;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+footer{border-top:1px solid var(--gb);padding:40px 20px;text-align:center;color:var(--m);font-size:.9rem}footer a,.card a{color:var(--c);margin:0 8px}
+.tech span{display:inline-block;margin:6px;padding:12px 18px;border-radius:14px;background:var(--g);border:1px solid var(--gb);animation:fl 4s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style></head><body>
+<div id="load"><i></i></div><div id="bar"></div><div id="cur"></div>
+<nav><b class="grad">OpinionMiner.AI</b><div><a href="#about">About</a><a href="#data">Dataset</a><a href="#flow">Pipeline</a><a href="#algo">Models</a><a href="#dash">Dashboard</a><a href="#try">Analyzer</a><a href="#res">Results</a><a href="#contact">Contact</a></div></nav>
+
+<section id="hero"><canvas id="net"></canvas><span class="tag">NLP · Sentiment Analysis</span>
+<h1 class="grad">Product Opinion Mining System</h1>
+<p style="font-size:1.2rem;color:var(--c)">Classifying customer reviews as positive, negative or neutral</p>
+<p class="sub">A sentiment analysis application that turns raw product reviews into clear opinions. Train, compare and test two models live in your browser.</p>
+<div><a class="btn pr" href="#try">Try the Analyzer</a><a class="btn" href="#dash">View Results</a></div></section>
+
+<section id="about"><h2 class="rv">About the <span class="grad">Project</span></h2><p class="sub rv">Opinion mining (sentiment analysis) extracts what customers feel from the text they write.</p>
+<div class="grid"><div class="card rv"><h3>💬 The problem</h3><p class="lbl">Thousands of reviews are impossible to read by hand. Businesses need an automatic way to see whether customers are happy.</p></div>
+<div class="card rv"><h3>🎯 The goal</h3><p class="lbl">Build an application that labels each review as positive, negative or neutral and summarizes the overall opinion.</p></div>
+<div class="card rv"><h3>🧠 The approach</h3><p class="lbl">Text is cleaned and tokenized, then classified by a Naive Bayes model and a lexicon-based scorer, both implemented from scratch.</p></div>
+<div class="card rv"><h3>🌍 Applications</h3><p class="lbl">Product feedback analysis, brand monitoring, customer support triage, market research and recommendation systems.</p></div></div></section>
+
+<section id="data"><h2 class="rv">The <span class="grad">Dataset</span></h2><p class="sub rv">A hand-written demo corpus of product reviews, balanced across three classes. It is small on purpose so every result is easy to inspect; larger corpora such as Amazon reviews are listed under Future Scope.</p>
+<div class="grid" style="margin-bottom:20px"><div class="card rv"><div class="num grad" id="nAll">0</div><div class="lbl">Reviews</div></div><div class="card rv"><div class="num grad" id="nTr">0</div><div class="lbl">Training</div></div><div class="card rv"><div class="num grad" id="nTe">0</div><div class="lbl">Testing</div></div><div class="card rv"><div class="num grad" id="nV">0</div><div class="lbl">Vocabulary words</div></div></div>
+<div class="grid"><div class="card rv"><h3>Class distribution</h3><div class="cv"><canvas id="dist"></canvas></div></div><div class="card rv tw"><h3>Sample reviews</h3><table id="tbl"></table></div></div></section>
+
+<section id="flow"><h2 class="rv">Processing <span class="grad">Pipeline</span></h2><div class="tl" id="tl"></div></section>
+
+<section id="algo"><h2 class="rv">Classification <span class="grad">Models</span></h2><p class="sub rv">Two models run live. The others are explained for context and listed as future work.</p><div class="grid" id="ag"></div></section>
+
+<section id="dash"><h2 class="rv">Comparative <span class="grad">Dashboard</span></h2><p class="sub rv">Every number here is computed in your browser on the held-out test reviews (every 4th review).</p>
+<div class="tabs rv" id="tabs"></div>
+<div class="grid"><div class="card"><div class="cv"><canvas id="c1"></canvas></div></div><div class="card"><h3 id="cmt">Confusion matrix</h3><div id="cm" class="tw"></div><p class="lbl">Rows are actual classes, columns are predicted.</p></div></div>
+<div class="card tw" style="margin-top:18px"><h3>Metric table (macro average)</h3><table id="mt"></table></div></section>
+
+<section id="try"><h2 class="rv">Opinion <span class="grad">Analyzer</span></h2><p class="sub rv">Type or paste reviews, one per line, and choose a model. You get a label, confidence and the words that drove the decision.</p>
+<div class="grid"><div class="card"><label class="lbl">Model</label><select id="mdl"><option value="nb">Naive Bayes (trained)</option><option value="lex">Lexicon scorer</option></select><label class="lbl">Reviews (one per line)</label>
+<textarea id="inp" rows="8">The battery is amazing and the screen is gorgeous
+Terrible quality, it broke after two days
+It arrived on Tuesday in a black box
+Not good at all, I want a refund
+Works great, I love it</textarea><button class="btn pr" id="go">Analyze opinions</button><button class="btn" id="smp">Load sample</button></div>
+<div class="card"><h3>Overall opinion</h3><div class="cv" style="height:200px"><canvas id="sc"></canvas></div><div id="sum" class="lbl"></div></div></div>
+<div class="card" style="margin-top:18px"><h3>Results</h3><div id="out"></div></div></section>
+
+<section id="res"><h2 class="rv">Results &amp; <span class="grad">Findings</span></h2><div class="grid" id="rg"></div></section>
+<section id="tech"><h2 class="rv">AI <span class="grad">Technology</span></h2><div class="tech rv"><span>🐍 Python</span><span>🔬 Scikit-learn</span><span>🔤 NLTK / NLP</span><span>🐼 Pandas</span><span>🔢 NumPy</span><span>📈 Matplotlib</span><span>🌐 JavaScript</span><span>📊 Chart.js</span></div></section>
+<section id="future"><h2 class="rv">Future <span class="grad">Scope</span></h2><div class="grid"><div class="card rv"><h3>Larger real datasets</h3><p class="lbl">Train on Amazon or Flipkart review corpora.</p></div><div class="card rv"><h3>TF-IDF + SVM / Logistic Regression</h3><p class="lbl">Stronger classical baselines.</p></div><div class="card rv"><h3>Transformers</h3><p class="lbl">BERT-style models for context and sarcasm.</p></div><div class="card rv"><h3>Aspect-based mining</h3><p class="lbl">Separate opinions on battery, price, delivery.</p></div><div class="card rv"><h3>Multilingual reviews</h3><p class="lbl">Support Hindi and Marathi text.</p></div></div></section>
+
+<section id="team"><h2 class="rv">Student <span class="grad">Information</span></h2><div class="card rv" style="max-width:520px"><div style="font-size:3rem">🎓</div><h3>Mubashshir Rizvi</h3><p class="lbl">Roll Number: CM24024<br>Department: AIML<br>Topic: Product Opinion Mining System<br>College: SB Jain</p></div></section>
+
+<section id="contact"><h2 class="rv">Get in <span class="grad">Touch</span></h2><div class="grid"><form class="card" id="f" novalidate><input id="fn" placeholder="Your name"><span class="err"></span><input id="fe" type="email" placeholder="Email"><span class="err"></span><textarea id="fm" rows="4" placeholder="Message"></textarea><span class="err"></span><button class="btn pr" type="submit">Send message</button><p id="ok" class="lbl"></p></form>
+<div class="card"><h3>Reach out</h3><p class="lbl"><a id="lmail" href="#" style="margin:0"></a><br><a id="lin" href="#" target="_blank" rel="noopener" style="margin:0">🔗 LinkedIn</a><br><a id="lgh" href="#" target="_blank" rel="noopener" style="margin:0">💻 GitHub</a></p></div></div></section>
+<footer><p><b class="grad">OpinionMiner.AI</b></p><p><a href="#about">About</a><a href="#dash">Dashboard</a><a href="#try">Analyzer</a><a href="#res">Results</a></p><p>Python · Scikit-learn · NLP · Chart.js</p><p>© 2026 Product Opinion Mining System</p></footer>
+<button id="top" aria-label="Back to top">↑</button>
+
+<script>
+/* ===== ML core (no DOM) ===== */
+const RAW={positive:["Absolutely love this phone, the battery lasts all day","Great quality and fast delivery, highly recommend","Excellent sound, very comfortable headphones","Works perfectly and looks beautiful","Amazing value for the price, very happy","The camera is fantastic and the screen is stunning","Super easy to set up, great product","Best purchase I have made this year","Fast shipping and the item is exactly as described","Really impressed by the build quality, feels premium","Wonderful laptop, smooth and quick","Perfect fit and very comfortable, love it","Customer support was helpful and friendly","Brilliant design and incredibly durable","I am delighted with this blender, it works great","Five stars, would buy again","Smooth performance and a gorgeous display","Good quality, does the job well","Very satisfied, the product exceeded my expectations","Lightweight, stylish and works like a charm"],
+negative:["Terrible quality, it broke after two days","Worst purchase ever, complete waste of money","The battery drains fast and the phone gets hot","Very disappointed, does not work as advertised","Poor build, feels cheap and flimsy","Delivery was late and the box was damaged","Awful sound, the speaker crackles constantly","Do not buy this, it stopped working within a week","Screen cracked easily and support was unhelpful","Horrible experience, the product is defective","Overpriced and slow, I regret buying it","The app keeps crashing, so frustrating","Bad fit, uncomfortable and ugly","Not worth the money, very unhappy","Stopped charging after a month, useless","The material is cheap and it smells bad","Disgusting packaging and a rude seller","Slow, noisy and unreliable","I hate it, the worst camera I have used","Refund took forever and nobody replied"],
+neutral:["The product arrived on Tuesday in a brown box","It is okay, nothing special","Average phone, does what it says","It comes in black and white colors","Decent for the price but not outstanding","The charger is included in the package","I bought this for my brother last month","Size is medium and the weight is about one kilogram","Works fine, neither good nor bad","It is an ordinary keyboard with standard keys","Mixed feelings, some features are good and some are not","The manual explains the setup steps","Packaging was standard and delivery took five days","Not bad, not great either","The laptop has 8 GB memory and a 256 GB drive","Acceptable quality, I expected about this","It is a regular water bottle","Color is slightly different from the picture","Fair product for everyday use","The item is what I ordered, no surprises"]};
+const CL=['positive','negative','neutral'],DATA=[];CL.forEach(c=>RAW[c].forEach(t=>DATA.push({t,c})));
+const TR=DATA.filter((_,i)=>i%4!=3),TE=DATA.filter((_,i)=>i%4==3);
+const STOP=new Set('the a an and is it of to in on for with was i this that are be at as so my me have has had'.split(' ')),NEG=new Set(['not','no','never','dont','didnt','doesnt','cant','wont','isnt','wasnt','nothing','neither']);
+const LP='love great excellent amazing fantastic perfect best good happy beautiful wonderful brilliant delighted recommend impressed satisfied comfortable fast smooth premium stylish gorgeous helpful friendly easy durable stunning exceeded quick super lightweight perfectly delighted'.split(' '),LN='terrible worst poor bad awful horrible disappointed broke broken defective waste cheap slow crashing useless hate regret unhappy late damaged uncomfortable ugly rude disgusting unreliable flimsy overpriced frustrating unhelpful cracked noisy drains hot disappointed'.split(' ');
+function tok(s){const w=s.toLowerCase().replace(/n't/g,'nt').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean),o=[];let n=0;for(const x of w){if(NEG.has(x)){o.push(x);n=2;continue}if(STOP.has(x))continue;o.push(n>0?'NOT_'+x:x);const sp=LP.includes(x),sn=LN.includes(x);if(sp||sn)o.push((sp!=(n>0))?'SENT_POS':'SENT_NEG');if(n>0)n--}return o}
+const V=new Set(),cnt={},tot={},pri={};CL.forEach(c=>{cnt[c]={};tot[c]=0;pri[c]=0});
+TR.forEach(d=>{pri[d.c]++;tok(d.t).forEach(w=>{V.add(w);cnt[d.c][w]=(cnt[d.c][w]||0)+1;tot[d.c]++})});
+function nb(s){const ws=tok(s),sc={};CL.forEach(c=>{let l=Math.log(pri[c]/TR.length);ws.filter(w=>V.has(w)).forEach(w=>{l+=Math.log(((cnt[c][w]||0)+1)/(tot[c]+V.size+1))});sc[c]=l});const m=Math.max(...CL.map(c=>sc[c])),e=CL.map(c=>Math.exp(sc[c]-m)),z=e.reduce((a,b)=>a+b);const pr={};CL.forEach((c,i)=>pr[c]=e[i]/z);return{label:CL.reduce((a,c)=>pr[c]>pr[a]?c:a),pr,ws}}
+function lex(s){const w=s.toLowerCase().replace(/n't/g,'nt').replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);let sc=0,n=0;const hits=[];for(const x of w){if(NEG.has(x)){n=3;continue}let v=LP.includes(x)?1:LN.includes(x)?-1:0;if(v){if(n>0)v=-v*.8;sc+=v;hits.push([x,v])}if(n>0)n--}const label=sc>=.7?'positive':sc<=-.7?'negative':'neutral',k=Math.min(.95,.5+Math.abs(sc)*.15),pr={positive:(1-k)/2,negative:(1-k)/2,neutral:(1-k)/2};pr[label]=label=='neutral'?Math.max(.5,k):k;return{label,pr,hits,ws:w}}
+const MD={nb:nb,lex:lex};
+function evalM(f){const cm=CL.map(()=>CL.map(()=>0));TE.forEach(d=>{cm[CL.indexOf(d.c)][CL.indexOf(f(d.t).label)]++});let ok=0,P=0,R=0,F=0;CL.forEach((c,i)=>{const tp=cm[i][i],fp=CL.reduce((a,_,j)=>a+cm[j][i],0)-tp,fn=cm[i].reduce((a,b)=>a+b)-tp,p=tp+fp?tp/(tp+fp):0,r=tp+fn?tp/(tp+fn):0;ok+=tp;P+=p;R+=r;F+=p+r?2*p*r/(p+r):0});return{cm,acc:ok/TE.length,p:P/3,r:R/3,f:F/3}}
+const t0=performance.now(),EV={nb:evalM(nb)},t1=performance.now();EV.lex=evalM(lex);const t2=performance.now();EV.nb.ms=t1-t0;EV.lex.ms=t2-t1;
+/* ===== UI ===== */
+if(typeof document!=='undefined'){
+const $=s=>document.querySelector(s),B='#4F9DFF',Pp='#7C4DFF',C='#00E5FF',COL={positive:'#34D399',negative:'#F87171',neutral:'#FBBF24'};
+const CFG={email:'mubashirrizvi@email.com',linkedin:'https://www.linkedin.com/',github:'https://github.com/mubashshirrizvi/FML-TAE-1'};
+Chart.defaults.color='#a9b4cc';Chart.defaults.borderColor='rgba(255,255,255,.08)';
+addEventListener('load',()=>{$('#load').style.opacity=0;setTimeout(()=>$('#load').remove(),600)});
+const cu=(el,T,s='')=>{const t0=performance.now();(function f(t){const p=Math.min((t-t0)/1400,1);el.textContent=Math.round(T*p)+s;p<1&&requestAnimationFrame(f)})(t0)};
+$('#nAll').dataset.n=DATA.length;$('#nTr').dataset.n=TR.length;$('#nTe').dataset.n=TE.length;$('#nV').dataset.n=V.size;
+new Chart($('#dist'),{type:'doughnut',data:{labels:CL,datasets:[{data:CL.map(c=>RAW[c].length),backgroundColor:CL.map(c=>COL[c]),borderWidth:0}]},options:{maintainAspectRatio:false}});
+$('#tbl').innerHTML='<tr><th>Review</th><th>Label</th></tr>'+CL.flatMap(c=>RAW[c].slice(0,3).map(t=>`<tr><td>${t}</td><td><span class="pill ${c}">${c}</span></td></tr>`)).join('');
+$('#tl').innerHTML=[['Data collection','Product reviews with a sentiment label'],['Cleaning','Lowercase, remove punctuation and filler (stop) words'],['Tokenization','Split text into words'],['Negation handling','"not good" becomes NOT_good so its meaning flips'],['Feature extraction','Bag-of-words counts plus positive/negative polarity features'],['Classification','Naive Bayes and lexicon scorer'],['Evaluation','Accuracy, precision, recall, F1, confusion matrix'],['Opinion summary','Aggregate labels into an overall sentiment']].map((x,i)=>`<div class="card rv"><b>${i+1}. ${x[0]}</b><div class="lbl">${x[1]}</div></div>`).join('');
+const pc=x=>(x*100).toFixed(1)+'%';
+$('#ag').innerHTML=[['Naive Bayes','Multinomial model with Laplace smoothing. Learns word probabilities per class from the training reviews, plus a polarity feature for known sentiment words.','Fast, works with small data','Assumes words are independent',EV.nb],['Lexicon Scorer','Adds up scores of known positive and negative words and flips them after negations. Needs no training.','Transparent, no data needed','Misses words outside its list',EV.lex],['TF-IDF + Logistic Regression / SVM','Weights rare informative words and learns a linear boundary.','Strong classical baseline','Needs more data (future work)',null],['Transformers (BERT)','Understands context, sarcasm and word order.','State-of-the-art accuracy','Heavy to train and run (future work)',null]].map(a=>`<div class="card rv"><h3>${a[0]}</h3>${a[4]?`<div class="num grad">${pc(a[4].acc)}</div><div class="lbl">Test accuracy (live)</div>`:'<span class="tag">Future work</span>'}<p class="lbl">${a[1]}</p><details><summary>Pros and cons</summary><p><b>+</b> ${a[2]}</p><p><b>−</b> ${a[3]}</p></details></div>`).join('');
+let ch;const tabs=['Overview','Radar','Per-class F1'];
+function perF1(m){return CL.map((_,i)=>{const cm=m.cm,tp=cm[i][i],fp=CL.reduce((a,_,j)=>a+cm[j][i],0)-tp,fn=cm[i].reduce((a,b)=>a+b)-tp,p=tp+fp?tp/(tp+fp):0,r=tp+fn?tp/(tp+fn):0;return p+r?2*p*r/(p+r):0})}
+const MN={nb:'Naive Bayes',lex:'Lexicon'};
+function show(v){ch&&ch.destroy();const k=['acc','p','r','f'],kl=['Accuracy','Precision','Recall','F1'],cols=[B,Pp];let cfg;
+if(v=='Overview')cfg={type:'bar',data:{labels:kl,datasets:['nb','lex'].map((m,i)=>({label:MN[m],data:k.map(x=>EV[m][x]),backgroundColor:cols[i]}))},options:{maintainAspectRatio:false,scales:{y:{min:0,max:1}}}};
+else if(v=='Radar')cfg={type:'radar',data:{labels:kl,datasets:['nb','lex'].map((m,i)=>({label:MN[m],data:k.map(x=>EV[m][x]),borderColor:cols[i],backgroundColor:cols[i]+'33'}))},options:{maintainAspectRatio:false,scales:{r:{min:0,max:1}}}};
+else cfg={type:'bar',data:{labels:CL,datasets:['nb','lex'].map((m,i)=>({label:MN[m],data:perF1(EV[m]),backgroundColor:cols[i]}))},options:{maintainAspectRatio:false,scales:{y:{min:0,max:1}}}};
+ch=new Chart($('#c1'),cfg);document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.textContent==v))}
+$('#tabs').innerHTML=tabs.map(v=>`<button class="btn">${v}</button>`).join('')+['nb','lex'].map(m=>`<button class="btn" data-m="${m}">Matrix: ${MN[m]}</button>`).join('');
+function cmx(m){$('#cmt').textContent='Confusion matrix: '+MN[m];const x=EV[m].cm;$('#cm').innerHTML='<table><tr><th></th>'+CL.map(c=>`<th>${c.slice(0,3)}</th>`).join('')+'</tr>'+x.map((r,i)=>`<tr><th>${CL[i].slice(0,3)}</th>`+r.map((v,j)=>`<td style="background:rgba(${i==j?'52,211,153':'248,113,113'},${v?.15+v/12:0})">${v}</td>`).join('')+'</tr>').join('')+'</table>'}
+$('#tabs').onclick=e=>{if(e.target.tagName!='BUTTON')return;e.target.dataset.m?cmx(e.target.dataset.m):show(e.target.textContent)};show('Overview');cmx('nb');
+$('#mt').innerHTML='<tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>Time (ms)</th></tr>'+['nb','lex'].map(m=>`<tr><td>${MN[m]}</td><td>${pc(EV[m].acc)}</td><td>${pc(EV[m].p)}</td><td>${pc(EV[m].r)}</td><td>${pc(EV[m].f)}</td><td>${EV[m].ms.toFixed(1)}</td></tr>`).join('');
+let sch;
+function analyze(){const f=MD[$('#mdl').value],ls=$('#inp').value.split('\n').map(s=>s.trim()).filter(Boolean),n={positive:0,negative:0,neutral:0};
+$('#out').innerHTML=ls.map(t=>{const r=f(t);n[r.label]++;const hi=r.hits?r.hits.map(h=>h[0]):[];const words=t.split(/(\s+)/).map(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');return LP.includes(c)?`<mark class="p">${w}</mark>`:LN.includes(c)?`<mark class="n">${w}</mark>`:w}).join('');
+return`<div class="rl">${words}<br><span class="pill ${r.label}">${r.label}</span> <span class="lbl">confidence ${pc(r.pr[r.label])}</span>${CL.map(c=>`<div class="bar" title="${c}"><i style="background:${COL[c]};width:${r.pr[c]*100}%"></i></div>`).join('')}</div>`}).join('')||'<p class="lbl">Enter at least one review.</p>';
+setTimeout(()=>document.querySelectorAll('.bar i').forEach(i=>i.style.width=i.style.width),0);
+sch&&sch.destroy();sch=new Chart($('#sc'),{type:'doughnut',data:{labels:CL,datasets:[{data:CL.map(c=>n[c]),backgroundColor:CL.map(c=>COL[c]),borderWidth:0}]},options:{maintainAspectRatio:false}});
+const mx=CL.reduce((a,c)=>n[c]>n[a]?c:a);$('#sum').innerHTML=ls.length?`${ls.length} reviews: <b class="${mx.slice(0,3)}">${n.positive} positive</b>, ${n.negative} negative, ${n.neutral} neutral. Overall opinion: <b>${mx}</b>.`:''}
+$('#go').onclick=analyze;$('#mdl').onchange=analyze;$('#smp').onclick=()=>{$('#inp').value=TE.map(d=>d.t).join('\n');analyze()};analyze();
+$('#rg').innerHTML=(()=>{const b=EV.nb.acc>=EV.lex.acc?'nb':'lex';return`<div class="card rv"><span class="tag">Best model</span><h3>${MN[b]}</h3><div class="num grad">${pc(EV[b].acc)}</div><p class="lbl">Test accuracy on ${TE.length} held-out reviews.</p></div><div class="card rv"><span class="tag">Macro F1</span><h3>${MN.nb} vs ${MN.lex}</h3><div class="num grad">${pc(EV.nb.f)} / ${pc(EV.lex.f)}</div><p class="lbl">Balanced score across the three classes.</p></div><div class="card rv"><span class="tag">Insight</span><h3>Data size matters</h3><p class="lbl">Naive Bayes needs far more labelled reviews than the lexicon scorer, and neutral reviews (few sentiment words) are the hardest class. Negation ("not good") must be handled.</p></div><div class="card rv"><span class="tag">Limitation</span><h3>Small corpus</h3><p class="lbl">With only ${TE.length} test reviews each review moves accuracy by about ${(100/TE.length).toFixed(1)} points, so treat results as indicative. The lexicon word list was written by the student with this corpus in mind, so its score is optimistic, while Naive Bayes learns only from ${TR.length} training reviews.</p></div>`})();
+$('#f').onsubmit=e=>{e.preventDefault();const f=[$('#fn'),$('#fe'),$('#fm')],r=[v=>v.trim().length>1,v=>/^\S+@\S+\.\S+$/.test(v),v=>v.trim().length>9],m=['Enter your name','Enter a valid email','Message needs 10+ characters'];let ok=1;f.forEach((el,i)=>{const g=r[i](el.value);el.nextElementSibling.textContent=g?'':m[i];if(!g)ok=0});if(!ok){$('#ok').textContent='';return}const body=`Name: ${f[0].value}\nEmail: ${f[1].value}\n\n${f[2].value}`;location.href=`mailto:${CFG.email}?subject=${encodeURIComponent('Portfolio message from '+f[0].value)}&body=${encodeURIComponent(body)}`;$('#ok').textContent='Opening your email app… if nothing opens, your message was copied: paste it into an email to '+CFG.email;try{navigator.clipboard.writeText(body)}catch(x){}f.forEach(el=>el.value='')};
+[$('#fn'),$('#fe'),$('#fm')].forEach(el=>el.addEventListener('input',()=>el.nextElementSibling.textContent=''));
+$('#lmail').href='mailto:'+CFG.email;$('#lmail').textContent='📧 '+CFG.email;$('#lin').href=CFG.linkedin;$('#lgh').href=CFG.github;
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');const n=e.target.querySelector('[data-n]');if(n&&!n.d){n.d=1;cu(n,+n.dataset.n)}io.unobserve(e.target)}}),{threshold:.2});document.querySelectorAll('.rv').forEach(e=>io.observe(e));
+addEventListener('scroll',()=>{const h=document.documentElement;$('#bar').style.width=scrollY/(h.scrollHeight-innerHeight)*100+'%';$('#top').classList.toggle('show',scrollY>500)});$('#top').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+let mx=0,my=0;addEventListener('mousemove',e=>{const c=$('#cur');c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+const cv=$('#net'),cx=cv.getContext('2d');let nd=[];function rs(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;nd=Array.from({length:Math.min(70,cv.width/14)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:Math.random()-.5,vy:Math.random()-.5,z:Math.random()*.8+.2,c:['#34D399','#F87171','#FBBF24','#00E5FF'][Math.floor(Math.random()*4)]}))}rs();addEventListener('resize',rs);
+(function tick(){cx.clearRect(0,0,cv.width,cv.height);nd.forEach(n=>{n.x=(n.x+n.vx*.4+cv.width)%cv.width;n.y=(n.y+n.vy*.4+cv.height)%cv.height});nd.forEach((a,i)=>{const ax=a.x+mx*40*a.z,ay=a.y+my*40*a.z;for(let j=i+1;j<nd.length;j++){const b=nd[j],bx=b.x+mx*40*b.z,by=b.y+my*40*b.z,d=Math.hypot(ax-bx,ay-by);if(d<130){cx.strokeStyle=`rgba(79,157,255,${.3*(1-d/130)})`;cx.beginPath();cx.moveTo(ax,ay);cx.lineTo(bx,by);cx.stroke()}}cx.fillStyle=a.c;cx.beginPath();cx.arc(ax,ay,1.5+a.z*1.5,0,6.283);cx.fill()});requestAnimationFrame(tick)})();
+}
+</script></body></html>
